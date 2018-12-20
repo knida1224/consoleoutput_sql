@@ -1,0 +1,243 @@
+SQL> @sailors.sql
+SQL> SET DEFINE OFF;
+SQL> 
+SQL> --Delete preexisting tables
+SQL> DROP TABLE boats cascade constraints;
+
+Table dropped.
+
+SQL> DROP TABLE reserves cascade constraints;
+
+Table dropped.
+
+SQL> DROP TABLE sailors cascade constraints;
+
+Table dropped.
+
+SQL> 
+SQL> --remove any ghost tables
+SQL> PURGE RECYCLEBIN;
+
+Recyclebin purged.
+
+SQL> 
+SQL> --create tables
+SQL> CREATE TABLE boats(  bid	     integer,
+  2  					      bname  char(20),
+  3  					  color      char(20),
+  4  					  PRIMARY KEY (bid));
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE sailors(   sid     integer,
+  2  						     sname   char(30),
+  3  						     rating  number,
+  4  						     age     number,
+  5  						     PRIMARY KEY (sid));
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE reserves(  sid     integer,
+  2  						     bid     integer,
+  3  						     day     date,
+  4  						     PRIMARY KEY (sid,bid,day),
+  5  						     CONSTRAINT FK_BID_RES FOREIGN KEY (bid) REFERENCES boats(bid),
+  6  						     CONSTRAINT FK_SID_RES FOREIGN KEY (sid) REFERENCES sailors(sid));
+
+Table created.
+
+SQL> 
+SQL> 
+SQL> --insert data into tables
+SQL> --boats
+SQL> INSERT INTO boats VALUES (101,  'Interlake', 'blue');
+
+1 row created.
+
+SQL> INSERT INTO boats VALUES (102,  'Interlake', 'red');
+
+1 row created.
+
+SQL> INSERT INTO boats VALUES (103,  'Clipper', 'green');
+
+1 row created.
+
+SQL> INSERT INTO boats VALUES (104,  'Marine', 'red');
+
+1 row created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> 
+SQL> --sailors
+SQL> INSERT INTO sailors VALUES (22, 'Dustin', 7, '45.0');
+
+1 row created.
+
+SQL> INSERT INTO sailors VALUES (29, 'Brutus', 1, '33.0');
+
+1 row created.
+
+SQL> INSERT INTO sailors VALUES (31, 'Lubber', 8, '55.5');
+
+1 row created.
+
+SQL> INSERT INTO sailors VALUES (32, 'Andy', 8, '25.5');
+
+1 row created.
+
+SQL> INSERT INTO sailors VALUES (58, 'Rusty', 10, '35.0');
+
+1 row created.
+
+SQL> INSERT INTO sailors VALUES (64, 'Horatio', 7, '35.0');
+
+1 row created.
+
+SQL> INSERT INTO sailors VALUES (71, 'Zorba', 10, '16.0');
+
+1 row created.
+
+SQL> INSERT INTO sailors VALUES (74, 'Horatio', 9, '35.0');
+
+1 row created.
+
+SQL> INSERT INTO sailors VALUES (85, 'Art', 3, '25.5');
+
+1 row created.
+
+SQL> INSERT INTO sailors VALUES (95, 'Bob', 3, '63.5');
+
+1 row created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> 
+SQL> --reserves
+SQL> INSERT INTO reserves VALUES (22, 101, TO_DATE('1998-10-10','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> INSERT INTO reserves VALUES (22, 102, TO_DATE('1998-10-10','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> INSERT INTO reserves VALUES (22, 103, TO_DATE('1998-10-08','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> INSERT INTO reserves VALUES (22, 104, TO_DATE('1998-10-07','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> INSERT INTO reserves VALUES (31, 102, TO_DATE('1998-11-10','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> INSERT INTO reserves VALUES (31, 103, TO_DATE('1998-11-06','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> INSERT INTO reserves VALUES (31, 104, TO_DATE('1998-11-12','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> INSERT INTO reserves VALUES (64, 101, TO_DATE('1998-09-05','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> INSERT INTO reserves VALUES (64, 102, TO_DATE('1998-09-08','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> INSERT INTO reserves VALUES (74, 103, TO_DATE('1998-09-08','YYYY-MM-DD'));
+
+1 row created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> select s.sid, s.sname, count(*)
+  2  from sailors s inner join reserves r
+  3  on s.sid = r.sid
+  4  inner join boats b
+  5  on r.bid = b.bid
+  6  group by s.sid, s.sname
+  7  having count(*) > 1;
+
+       SID SNAME                            COUNT(*)                                                                                                                                                                                                                                                        
+---------- ------------------------------ ----------                                                                                                                                                                                                                                                        
+        31 Lubber                                  3                                                                                                                                                                                                                                                        
+        64 Horatio                                 2                                                                                                                                                                                                                                                        
+        22 Dustin                                  4                                                                                                                                                                                                                                                        
+
+SQL> select s.sid, s.sname, count(*)
+  2  from sailors s inner join reserves r
+  3  on s.sid = r.sid
+  4  inner join boats b
+  5  on r.bid = b.bid
+  6  where s.rating between 5 and 8
+  7  group by s.sid, s.sname
+  8  having count(*) > 2
+  9  ;
+
+       SID SNAME                            COUNT(*)                                                                                                                                                                                                                                                        
+---------- ------------------------------ ----------                                                                                                                                                                                                                                                        
+        31 Lubber                                  3                                                                                                                                                                                                                                                        
+        22 Dustin                                  4                                                                                                                                                                                                                                                        
+
+SQL> select avg(s.age) as avgage
+  2  from sailors s inner join reserves r
+  3  on s.sid = r.sid
+  4  inner join boats b
+  5  on r.bid = b.bid
+  6  where s.rating > 7
+  7  and (b.bname = 'Clipper' or b.bname = 'Interlake')
+  8  ;
+
+    AVGAGE                                                                                                                                                                                                                                                                                                  
+----------                                                                                                                                                                                                                                                                                                  
+48.6666667                                                                                                                                                                                                                                                                                                  
+
+SQL> select max(s.age)
+  2  from sailors s inner join reserves r
+  3  on s.sid = r.sid
+  4  inner join boats b
+  5  on r.bid = b.bid
+  6  where b.color = 'red'
+  7  group by s.rating;
+
+MAX(S.AGE)                                                                                                                                                                                                                                                                                                  
+----------                                                                                                                                                                                                                                                                                                  
+      55.5                                                                                                                                                                                                                                                                                                  
+        45                                                                                                                                                                                                                                                                                                  
+
+SQL> select sname
+  2  from sailors
+  3  where rating < (select rating form sailors where sname = 'Andy');
+where rating < (select rating form sailors where sname = 'Andy')
+                                   *
+ERROR at line 3:
+ORA-00923: FROM keyword not found where expected 
+
+
+SQL> select sname
+  2  from sailors
+  3  where rating < (select rating from sailors where sname = 'Andy');
+
+SNAME                                                                                                                                                                                                                                                                                                       
+------------------------------                                                                                                                                                                                                                                                                              
+Dustin                                                                                                                                                                                                                                                                                                      
+Brutus                                                                                                                                                                                                                                                                                                      
+Horatio                                                                                                                                                                                                                                                                                                     
+Art                                                                                                                                                                                                                                                                                                         
+Bob                                                                                                                                                                                                                                                                                                         
+
+SQL> exit

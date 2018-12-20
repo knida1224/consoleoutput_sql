@@ -1,0 +1,183 @@
+SQL> @art.sql
+SQL> SET DEFINE OFF;
+SQL> 
+SQL> DROP TABLE artist cascade constraints;
+
+Table dropped.
+
+SQL> DROP TABLE album cascade constraints;
+
+Table dropped.
+
+SQL> DROP TABLE song cascade constraints;
+
+Table dropped.
+
+SQL> 
+SQL> PURGE recyclebin;
+
+Recyclebin purged.
+
+SQL> 
+SQL> CREATE TABLE artist(    ar_id integer,
+  2  			     name char(20),
+  3  			     gender char(20),
+  4  			     genre char(20),
+  5  			     PRIMARY KEY (ar_id));
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE album(	 al_id integer,
+  2  			     ar_id integer,
+  3  			     year_made integer,
+  4  			     name char(30),
+  5  			     cost real,
+  6  			     PRIMARY KEY (ar_id),
+  7  			     UNIQUE (al_id),
+  8  			     CONSTRAINT FK_AR_ID FOREIGN KEY (ar_id) REFERENCES artist(ar_id)
+  9  				     ON DELETE CASCADE);
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE song(      s_id integer,
+  2  			     al_id integer,
+  3  			     title char(20),
+  4  			     duration char(10),
+  5  			     PRIMARY KEY (s_id,al_id),
+  6  			     CONSTRAINT FK_AL_ID FOREIGN KEY (al_id) REFERENCES album(al_id)
+  7  				     ON DELETE CASCADE);
+
+Table created.
+
+SQL> 
+SQL> --artist
+SQL> INSERT INTO artist VALUES(1, 'Kendrick Lamar', 'M', 'Rap');
+
+1 row created.
+
+SQL> INSERT INTO artist VALUES(2, 'Nicki Minaj', 'F', 'Rap');
+
+1 row created.
+
+SQL> INSERT INTO artist VALUES(3, 'Luis Fonsi', 'M', 'Latin');
+
+1 row created.
+
+SQL> INSERT INTO artist VALUES(4, 'Sia', 'F', 'Dance');
+
+1 row created.
+
+SQL> INSERT INTO artist VALUES(5, 'Camila Cabello', 'F', 'Latin');
+
+1 row created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> 
+SQL> --album
+SQL> INSERT INTO  album VALUES(1, 1, 2017, 'Damn', 8.23);
+
+1 row created.
+
+SQL> INSERT INTO  album VALUES(2, 2, 2017, 'The Pinkprint', 5.99);
+
+1 row created.
+
+SQL> INSERT INTO  album VALUES(3, 3, 2017, 'Despacito & My Greatest Hits', 9.92);
+
+1 row created.
+
+SQL> INSERT INTO  album VALUES(4, 4, 2017, 'This Is Acting', 9.99);
+
+1 row created.
+
+SQL> INSERT INTO  album VALUES(5, 5, 2018, 'Camila', 9.97);
+
+1 row created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> 
+SQL> --song
+SQL> INSERT INTO song VALUES(1, 1, 'God', '00:04:08');
+
+1 row created.
+
+SQL> INSERT INTO song VALUES(2, 1, 'Feel', '00:03:34');
+
+1 row created.
+
+SQL> INSERT INTO song VALUES(3, 2, 'All Things Go', '00:04:53');
+
+1 row created.
+
+SQL> INSERT INTO song VALUES(4, 2, 'Feeling Myself', '00:03:57');
+
+1 row created.
+
+SQL> INSERT INTO song VALUES(5, 3, 'Despacito', '00:03:48');
+
+1 row created.
+
+SQL> INSERT INTO song VALUES(6, 5, 'Havana', '00:03:37');
+
+1 row created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> select ((cost * 0.065) + cost) as f_cost
+  2  from album;
+
+    F_COST                                                                                                                                                                                                                                                                                                  
+----------                                                                                                                                                                                                                                                                                                  
+   8.76495                                                                                                                                                                                                                                                                                                  
+   6.37935                                                                                                                                                                                                                                                                                                  
+   10.5648                                                                                                                                                                                                                                                                                                  
+  10.63935                                                                                                                                                                                                                                                                                                  
+  10.61805                                                                                                                                                                                                                                                                                                  
+
+SQL> delete from artist
+  2  where name = 'Sia';
+
+1 row deleted.
+
+SQL> select * from artist;
+
+     AR_ID NAME                 GENDER               GENRE                                                                                                                                                                                                                                                  
+---------- -------------------- -------------------- --------------------                                                                                                                                                                                                                                   
+         1 Kendrick Lamar       M                    Rap                                                                                                                                                                                                                                                    
+         2 Nicki Minaj          F                    Rap                                                                                                                                                                                                                                                    
+         3 Luis Fonsi           M                    Latin                                                                                                                                                                                                                                                  
+         5 Camila Cabello       F                    Latin                                                                                                                                                                                                                                                  
+
+SQL> select * from album;
+
+     AL_ID      AR_ID  YEAR_MADE NAME                                 COST                                                                                                                                                                                                                                  
+---------- ---------- ---------- ------------------------------ ----------                                                                                                                                                                                                                                  
+         1          1       2017 Damn                                 8.23                                                                                                                                                                                                                                  
+         2          2       2017 The Pinkprint                        5.99                                                                                                                                                                                                                                  
+         3          3       2017 Despacito & My Greatest Hits         9.92                                                                                                                                                                                                                                  
+         5          5       2018 Camila                               9.97                                                                                                                                                                                                                                  
+
+SQL> select * from song;
+
+      S_ID      AL_ID TITLE                DURATION                                                                                                                                                                                                                                                         
+---------- ---------- -------------------- ----------                                                                                                                                                                                                                                                       
+         1          1 God                  00:04:08                                                                                                                                                                                                                                                         
+         2          1 Feel                 00:03:34                                                                                                                                                                                                                                                         
+         3          2 All Things Go        00:04:53                                                                                                                                                                                                                                                         
+         4          2 Feeling Myself       00:03:57                                                                                                                                                                                                                                                         
+         5          3 Despacito            00:03:48                                                                                                                                                                                                                                                         
+         6          5 Havana               00:03:37                                                                                                                                                                                                                                                         
+
+6 rows selected.
+
+SQL> exit
